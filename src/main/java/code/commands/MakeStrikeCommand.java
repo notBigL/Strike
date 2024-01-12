@@ -14,6 +14,7 @@ public class MakeStrikeCommand extends ConsoleCommand {
         this.requiresPlayer = true;
         this.minExtraTokens = 1;
         this.maxExtraTokens = 1;
+        this.simpleCheck = true;
     }
 
     public void execute(String[] tokens, int depth) {
