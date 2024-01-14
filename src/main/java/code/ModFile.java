@@ -42,6 +42,7 @@ public class ModFile implements
 
     @Override
     public void receivePostInitialize() {
-        ConsoleCommand.addCommand("makeStrike", MakeStrikeCommand.class);
+        System.out.println("Attempting to register makeStrikeCommand");
+        ConsoleCommand.addCommand("makestrike", MakeStrikeCommand.class);
     }
 }
