@@ -4,7 +4,7 @@
     <groupId>UnimportantInfo</groupId>
 
     <artifactId>MakeStrike</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
     <name>Strike</name>
     <description>Make any card a Strike.</description>
     <!-- Change the above for mod information. -->

@@ -5,6 +5,7 @@ import basemod.DevConsole;
 import basemod.devcommands.ConsoleCommand;
 import basemod.helpers.CardTags;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.cards.CardGroup;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 
@@ -15,7 +16,7 @@ public class MakeStrikeCommand extends ConsoleCommand {
 
     public MakeStrikeCommand() {
         this.requiresPlayer = true;
-        this.minExtraTokens = 2;
+        this.minExtraTokens = 1;
         this.maxExtraTokens = 2;
     }
 
@@ -23,33 +24,32 @@ public class MakeStrikeCommand extends ConsoleCommand {
         String cardName = this.getCardID(tokens);
         AbstractCard c = CardLibrary.getCard(cardName);
         if (c != null) {
-
-            for (AbstractCard handCard : new ArrayList<>(AbstractDungeon.player.hand.group)) {
-                if (c.cardID.equals(handCard.cardID) && !handCard.hasTag(AbstractCard.CardTags.STRIKE)) {
-                    CardTags.addTags(handCard, AbstractCard.CardTags.STRIKE);
-                    consoleLogForSuccessfulCommand(true, handCard.cardID);
-                }
-            }
-            for (AbstractCard drawPileCard : new ArrayList<>(AbstractDungeon.player.drawPile.group)) {
-                if (c.cardID.equals(drawPileCard.cardID) && !drawPileCard.hasTag(AbstractCard.CardTags.STRIKE)) {
-                    CardTags.addTags(drawPileCard, AbstractCard.CardTags.STRIKE);
-                    consoleLogForSuccessfulCommand(true, drawPileCard.cardID);
-                }
-            }
-            for (AbstractCard discardPileCard : new ArrayList<>(AbstractDungeon.player.discardPile.group)) {
-                if (c.cardID.equals(discardPileCard.cardID) && !discardPileCard.hasTag(AbstractCard.CardTags.STRIKE)) {
-                    CardTags.addTags(discardPileCard, AbstractCard.CardTags.STRIKE);
-                    consoleLogForSuccessfulCommand(true, discardPileCard.cardID);
-                }
-            }
-            for (AbstractCard exhaustPileCard : new ArrayList<>(AbstractDungeon.player.exhaustPile.group)) {
-                if (c.cardID.equals(exhaustPileCard.cardID) && !exhaustPileCard.hasTag(AbstractCard.CardTags.STRIKE)) {
-                    CardTags.addTags(exhaustPileCard, AbstractCard.CardTags.STRIKE);
-                    consoleLogForSuccessfulCommand(true, exhaustPileCard.cardID);
-                }
+            if (tokens[depth + 1].equals("true") || tokens[depth + 1].isEmpty()) {
+                skimThroughAllPiles(true, c);
+            } else if (tokens[depth + 1].equals("false")) {
+                skimThroughAllPiles(false, c);
             }
         } else {
             DevConsole.log("could not find card " + cardName);
+        }
+    }
+
+    private void skimThroughAllPiles(boolean addTag, AbstractCard c) {
+        skimThroughGivenPile(addTag, AbstractDungeon.player.hand, c);
+        skimThroughGivenPile(addTag, AbstractDungeon.player.drawPile, c);
+        skimThroughGivenPile(addTag, AbstractDungeon.player.discardPile, c);
+        skimThroughGivenPile(addTag, AbstractDungeon.player.exhaustPile, c);
+    }
+
+    private void skimThroughGivenPile(boolean addTag, CardGroup player, AbstractCard c) {
+        for (AbstractCard card : new ArrayList<>(player.group)) {
+            if (c.cardID.equals(card.cardID) && addTag && !card.hasTag(AbstractCard.CardTags.STRIKE)) {
+                CardTags.addTags(card, AbstractCard.CardTags.STRIKE);
+                consoleLogForSuccessfulCommand(true, card.cardID);
+            } else if (c.cardID.equals(card.cardID) && !addTag && card.hasTag(AbstractCard.CardTags.STRIKE)) {
+                CardTags.removeTags(card, AbstractCard.CardTags.STRIKE);
+                consoleLogForSuccessfulCommand(false, card.cardID);
+            }
         }
     }
 
@@ -96,9 +96,9 @@ public class MakeStrikeCommand extends ConsoleCommand {
 
     private void consoleLogForSuccessfulCommand(boolean addedTag, String cardID) {
         if (addedTag) {
-            System.out.println("Strike tag added to: " + cardID);
+            DevConsole.log("Strike tag added to: " + cardID);
         } else {
-            System.out.println("Strike tag removed from: " + cardID);
+            DevConsole.log("Strike tag removed from: " + cardID);
         }
     }
 }
